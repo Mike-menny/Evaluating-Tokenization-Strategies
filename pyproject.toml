@@ -1,0 +1,31 @@
+[project]
+name = "evaluating-tokenization-strategies"
+version = "1.0.0"
+description = "DAFx 2026 demo: evaluating tokenization strategies for expressive classical piano performance generation."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "torch>=2.5.0",
+    "pandas",
+    "numpy",
+    "matplotlib>=3.8.0",
+    "mido",
+    "tqdm",
+    "midi2audio>=0.1.1",
+    "librosa",
+    "soundfile",
+    "pyloudnorm",
+    "frechet-audio-distance>=0.3.4",
+    "flask",
+    "scipy",
+]
+
+[project.optional-dependencies]
+flash = []  # install flash-attn separately to match your CUDA/torch
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
