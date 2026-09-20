@@ -1,0 +1,96 @@
+{
+  "description": "Curated training/reference performances for the DAFx demo. MIDI files are not stored in git; place licensed local copies under the listed relative paths. These are not generated model outputs.",
+  "items": [
+    {
+      "id": "asap-chopin-etude",
+      "dataset": "ASAP",
+      "composer": "Chopin",
+      "genre": "etude",
+      "work": "Etude (ASAP performance)",
+      "split": "test",
+      "excerpt_start_sec": 0,
+      "excerpt_end_sec": 30,
+      "license": "ASAP dataset terms plus underlying score/performance licenses",
+      "local_relpath": "data/asap/Chopin/etude/reference.mid",
+      "notes": "Use an ASAP test-split performance matching paper 119 Table 2."
+    },
+    {
+      "id": "asap-bach-fugue",
+      "dataset": "ASAP",
+      "composer": "Bach",
+      "genre": "fugue",
+      "work": "Fugue (ASAP performance)",
+      "split": "test",
+      "excerpt_start_sec": 0,
+      "excerpt_end_sec": 30,
+      "license": "ASAP dataset terms plus underlying score/performance licenses",
+      "local_relpath": "data/asap/Bach/fugue/reference.mid",
+      "notes": "Observed pair from paper Table 2."
+    },
+    {
+      "id": "asap-beethoven-sonata",
+      "dataset": "ASAP",
+      "composer": "Beethoven",
+      "genre": "sonata",
+      "work": "Sonata (ASAP performance)",
+      "split": "test",
+      "excerpt_start_sec": 0,
+      "excerpt_end_sec": 30,
+      "license": "ASAP dataset terms plus underlying score/performance licenses",
+      "local_relpath": "data/asap/Beethoven/sonata/reference.mid",
+      "notes": "Observed pair from paper Table 2."
+    },
+    {
+      "id": "asap-debussy-images",
+      "dataset": "ASAP",
+      "composer": "Debussy",
+      "genre": "images",
+      "work": "Images (ASAP performance)",
+      "split": "test",
+      "excerpt_start_sec": 0,
+      "excerpt_end_sec": 30,
+      "license": "ASAP dataset terms plus underlying score/performance licenses",
+      "local_relpath": "data/asap/Debussy/images/reference.mid",
+      "notes": "Observed pair from paper Table 2."
+    },
+    {
+      "id": "asap-liszt-sonata",
+      "dataset": "ASAP",
+      "composer": "Liszt",
+      "genre": "sonata",
+      "work": "Sonata (ASAP performance)",
+      "split": "test",
+      "excerpt_start_sec": 0,
+      "excerpt_end_sec": 30,
+      "license": "ASAP dataset terms plus underlying score/performance licenses",
+      "local_relpath": "data/asap/Liszt/sonata/reference.mid",
+      "notes": "Observed pair from paper Table 2."
+    },
+    {
+      "id": "asap-schubert-impromptu",
+      "dataset": "ASAP",
+      "composer": "Schubert",
+      "genre": "impromptu",
+      "work": "Impromptu (ASAP performance)",
+      "split": "test",
+      "excerpt_start_sec": 0,
+      "excerpt_end_sec": 30,
+      "license": "ASAP dataset terms plus underlying score/performance licenses",
+      "local_relpath": "data/asap/Schubert/impromptu/reference.mid",
+      "notes": "Observed pair from paper Table 2."
+    },
+    {
+      "id": "maestro-chopin-placeholder",
+      "dataset": "MAESTRO",
+      "composer": "Chopin",
+      "genre": "etude",
+      "work": "Matching MAESTRO source recording if available locally",
+      "split": "held-out-from-pretrain",
+      "excerpt_start_sec": 0,
+      "excerpt_end_sec": 30,
+      "license": "MAESTRO CC BY-NC 4.0",
+      "local_relpath": "data/maestro/Chopin/etude/reference.mid",
+      "notes": "Optional second-dataset reference. Do not ship the corpus in git."
+    }
+  ]
+}
