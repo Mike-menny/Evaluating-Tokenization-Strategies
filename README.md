@@ -24,6 +24,7 @@ Evaluating-Tokenization-Strategies/
 ├── pyproject.toml
 ├── configs/ds_zero2.json
 ├── demo_static/                   # web demo UI
+├── dafx26_demo/                   # offline comparison + continuous MLX demo
 ├── artifacts/                     # example generated MIDI + WAV (demo track)
 ├── scripts/
 │   ├── run_lakh_maestro_pretrain.sh
@@ -177,6 +178,46 @@ PYTHONPATH=. python3 scripts/serve_midi_tokenization_demo.py --host 0.0.0.0 --po
 ```
 
 Open `http://127.0.0.1:9310/`. UI lives in `demo_static/`. All six modes load on CPU; the active mode is moved to GPU for generation.
+
+### DAFx26 comparison and live demo
+
+The `dafx26_demo/` package is the conference-ready demo. It compares multiple
+tokenization modes with a shared seed, supports quality-checked pregenerated
+fallbacks, and vendors its browser player and sampled piano for offline use.
+On Apple Silicon, the optional MLX backend adds continuous, cancellable live
+generation with a scrolling piano roll, playback-speed control, sustain bars,
+and beat markers.
+
+Install and download the pinned six-model release:
+
+```bash
+pip install -e '.[dafx26-demo]'
+python scripts/download_dafx26_models.py
+python scripts/check_dafx26_demo.py
+python scripts/launch_dafx26_demo.py
+```
+
+Open `http://127.0.0.1:9310/`.
+
+For continuous live generation on Apple Silicon:
+
+```bash
+pip install -e '.[dafx26-demo,mlx]'
+python scripts/convert_dafx26_models_mlx.py
+python scripts/launch_dafx26_demo.py --device mlx --live-buffer-sec 2
+```
+
+The live endpoint is intentionally available only with `--device mlx`;
+PyTorch CPU, CUDA, and MPS remain available for finite comparison generation.
+Offline browser assets are committed under `dafx26_demo/static/vendor/`; run
+`python scripts/vendor_dafx26_static.py` only to restore missing assets.
+
+Run the focused test suites with:
+
+```bash
+pytest -q
+node --test tests/js/*.test.mjs
+```
 
 ---
 

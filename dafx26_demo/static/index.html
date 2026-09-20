@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DAFx26 — Tokenization comparison</title>
+  <script src="/vendor/tone.js"></script>
+  <script src="/vendor/magenta-core.js"></script>
+  <script src="/vendor/html-midi-player.js"></script>
+  <style>
+    :root {
+      --bg: #14110e;
+      --ink: #f4eee4;
+      --muted: #b7aa9a;
+      --line: #3d352c;
+      --accent: #c4a35a;
+      --ok: #7d9b76;
+      --bad: #c47a6a;
+      --panel: #221e18;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      font: 16px/1.45 system-ui, "IBM Plex Sans", sans-serif;
+      background: var(--bg);
+    }
+    .wrap { width: min(1200px, calc(100% - 2rem)); margin: 0 auto; padding: 1.5rem 0 3rem; }
+    h1 { font-size: 1.8rem; margin: 0 0 0.4rem; }
+    .lede, .status, .hint { color: var(--muted); }
+    .status.ok { color: var(--ok); }
+    .status.err { color: var(--bad); }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 1rem 1.1rem;
+      margin-top: 1rem;
+    }
+    .row { display: flex; flex-wrap: wrap; gap: 0.8rem 1rem; align-items: end; }
+    label { display: grid; gap: 0.3rem; font-size: 0.75rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+    select, input { background: #16130f; color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 0.5rem 0.65rem; font: inherit; }
+    button {
+      border: 0; border-radius: 999px; padding: 0.7rem 1.2rem;
+      font: 600 0.95rem/1 system-ui, sans-serif; cursor: pointer;
+      background: var(--accent); color: #1a1408;
+    }
+    button.secondary { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+    button:disabled { opacity: 0.55; cursor: wait; }
+    input[type="range"] { padding: 0.45rem 0; min-width: 8rem; accent-color: var(--accent); }
+    .speed-value { color: var(--ink); font-variant-numeric: tabular-nums; text-transform: none; letter-spacing: 0; font-size: 0.9rem; }
+    .modes { display: flex; flex-wrap: wrap; gap: 0.45rem 0.8rem; }
+    .modes label { text-transform: none; letter-spacing: 0; font-size: 0.9rem; color: var(--ink); display: flex; gap: 0.35rem; align-items: center; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0.9rem; margin-top: 1rem; }
+    .card h3 { margin: 0 0 0.35rem; }
+    .meta { color: var(--muted); font-size: 0.88rem; }
+    midi-player, midi-visualizer { display: block; width: 100%; margin-top: 0.5rem; }
+    midi-visualizer {
+      background: #100e0c;
+      border-radius: 8px;
+      min-height: 120px;
+      overflow-x: auto;
+    }
+    midi-visualizer svg { display: block; }
+    .beats { position: relative; height: 8px; margin: 0.2rem 0 0.4rem; }
+    .beat-blip { position: absolute; bottom: 0; width: 2px; height: 4px; background: #7dc876; }
+    .beat-blip.is-downbeat { height: 7px; background: #9ce394; }
+    .beat-blip.is-rubato { width: 3px; border-radius: 50%; }
+    nav.tabs { display: flex; gap: 0.5rem; margin-top: 1rem; }
+    .hidden { display: none; }
+    a { color: var(--accent); }
+    .live-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      min-height: 2.2rem;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+    .live-indicator[hidden] { display: none; }
+    .live-dot {
+      width: 0.7rem;
+      height: 0.7rem;
+      border-radius: 50%;
+      background: var(--muted);
+    }
+    .live-indicator.is-loading .live-dot,
+    .live-indicator.is-buffering .live-dot {
+      background: var(--accent);
+      animation: live-pulse 0.8s ease-in-out infinite;
+    }
+    .live-indicator.is-playing .live-dot { background: var(--ok); }
+    @keyframes live-pulse {
+      50% { opacity: 0.35; transform: scale(1.25); }
+    }
+    #live-piano-roll {
+      display: block;
+      width: 100%;
+      height: 220px;
+      margin-top: 1rem;
+      background: #100e0c;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Evaluating tokenization strategies</h1>
+    <p class="lede">Paper 119 live comparison. Choose an observed ASAP pair, generate the same seed across tokenizations, and keep talking if a mode fails.</p>
+    <div id="status" class="status">Starting…</div>
+    <nav class="tabs">
+      <button id="tab-compare" type="button">Compare tokenizations</button>
+      <button id="tab-refs" class="secondary" type="button">Reference performances</button>
+    </nav>
+
+    <section id="compare-view" class="panel">
+      <div class="row">
+        <label>Composer / genre
+          <select id="pair"></select>
+        </label>
+        <label>Shared seed
+          <input id="seed" type="number" value="0" />
+        </label>
+        <label>Length (tokens)
+          <select id="max_tokens">
+            <option value="256" selected>256 — short</option>
+            <option value="512">512 — conference</option>
+          </select>
+        </label>
+      </div>
+      <p class="hint">Modes</p>
+      <div id="modes" class="modes"></div>
+      <div class="row" style="margin-top:1rem">
+        <button id="generate" type="button">Generate comparison</button>
+        <button id="fallback" class="secondary" type="button">Use pregenerated examples</button>
+      </div>
+      <div class="row" style="margin-top:1rem">
+        <label>Live mode
+          <select id="live-mode" disabled></select>
+        </label>
+        <button id="live-play" type="button" disabled>Play live</button>
+        <button id="live-stop" class="secondary" type="button" disabled>Stop</button>
+        <label>Speed
+          <input id="live-speed" type="range" min="0.5" max="1" step="0.05" value="0.75" />
+          <span id="live-speed-value" class="speed-value">0.75×</span>
+        </label>
+        <label>Audio output
+          <select id="live-audio-device">
+            <option value="">Default system output</option>
+          </select>
+        </label>
+        <div id="live-indicator" class="live-indicator" hidden>
+          <span class="live-dot" aria-hidden="true"></span>
+          <span id="live-indicator-text">Idle</span>
+        </div>
+      </div>
+      <p class="hint">Live playback is available only when the server is launched with MLX. It uses the same sampled piano as the comparison cards. Speed defaults to 0.75×. The gold pulse means it is still loading or buffering. The live piano roll shows generated notes around the playhead. Teal is sustain pedal; green blips are beats.</p>
+      <canvas id="live-piano-roll" width="1100" height="220" aria-label="Live piano roll"></canvas>
+      <div id="cards" class="cards"></div>
+    </section>
+
+    <section id="refs-view" class="panel hidden">
+      <p class="hint">Training/reference MIDI from ASAP or MAESTRO. These are not model outputs. Files appear only if the licensed corpus is present locally.</p>
+      <div id="refs" class="cards"></div>
+    </section>
+  </div>
+  <script type="module" src="/js/compare_app.mjs"></script>
+</body>
+</html>
